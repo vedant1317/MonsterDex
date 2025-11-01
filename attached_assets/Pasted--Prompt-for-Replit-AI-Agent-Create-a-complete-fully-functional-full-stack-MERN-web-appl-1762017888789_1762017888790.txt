@@ -1,0 +1,106 @@
+**Prompt for Replit AI Agent:**
+
+```
+Create a complete, fully functional full-stack MERN web application called **MonsterDex** - a review platform for Monster Energy drinks. Use **only JavaScript** (NO TypeScript). **Strictly separate the project into two main folders: `backend` and `frontend`**. The app must be ready to run on Replit with a single `npm run dev` command.
+
+### 🎨 **Theme & UI/UX**
+- **Dark mode only** by default: Background `#0a0a0a` / `#0f0f23`, cards `#1a1a2e`, accents **neon green** (`#00ff88`, `#39ff14`).
+- **Neon glow effects**: Buttons/hovers with `box-shadow: 0 0 20px #00ff88`, gradients `linear-gradient(45deg, #00ff88, #39ff14)`.
+- **Animations**: Use **Framer Motion** for smooth page transitions, card hovers (scale 1.05 + glow), loading spinners, confetti on achievements.
+- **Interactive elements**: Particles.js or canvas particles on landing, draggable leaderboard, review stars animation.
+- **Responsive**: Mobile-first with Tailwind CSS.
+- **Fonts**: Google Fonts - "Orbitron" for headers (futuristic), "Rajdhani" for body.
+
+### 📁 **Project Structure**
+```
+MonsterDex/
+├── backend/
+│   ├── models/ (User.js, Flavor.js, Review.js)
+│   ├── routes/ (auth.js, flavors.js, reviews.js, users.js, leaderboard.js)
+│   ├── middleware/ (auth.js)
+│   ├── seed.js (run once to populate flavors)
+│   ├── server.js
+│   ├── .env.example
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/ (Navbar, FlavorCard, ReviewForm, AchievementBadge, etc.)
+│   │   ├── pages/ (Landing, Catalog, FlavorDetail, Leaderboard, Profile, Auth)
+│   │   ├── context/ (AuthContext.js)
+│   │   ├── hooks/ (useAuth.js)
+│   │   ├── utils/ (api.js with axios)
+│   │   └── App.js, index.js
+│   ├── tailwind.config.js
+│   └── package.json
+├── package.json (root: concurrently)
+└── .replit (run command)
+```
+
+### 🛠 **Backend (Node.js + Express + MongoDB)**
+- **Dependencies**: express, mongoose, bcryptjs, jsonwebtoken, cors, dotenv, nodemon.
+- **Connect to MongoDB Atlas** (prompt user for free cluster; use env `MONGO_URI`).
+- **JWT Auth**: Protected routes with `auth` middleware.
+- **Models**:
+  | Field | User | Flavor | Review |
+  |-------|------|--------|--------|
+  | Key Fields | `_id`, `email`, `password` (hashed), `username`, `triedFlavors[]` (Flavor IDs), `achievements[]` (strings), `stats` {`totalTried`, `totalReviews`, `avgRating`} | `_id`, `name`, `description`, `category`, `imageUrl`, `avgRating`, `totalReviews`, `reviews[]` | `_id`, `userId`, `flavorId`, `rating` (1-5), `comment`, `createdAt` |
+- **Routes (RESTful)**:
+  - `POST /api/auth/register`, `/login` → JWT token.
+  - `GET /api/flavors` (search/query params: ?search= &category=), `GET /api/flavors/:id`.
+  - `POST /api/reviews` (create), `GET /api/reviews/flavor/:id`.
+  - `GET /api/leaderboard` → Top 10 flavors by avgRating (calculated).
+  - `GET/PUT /api/users/profile` → Fetch/update triedFlavors, auto-update achievements/stats.
+  - `POST /api/seed` → One-time seed (protected).
+- **Seed Script** (`npm run seed`): Populate **50+ real Monster flavors** with:
+  ```
+  [
+    {name: "Monster Energy Original", category: "Original", description: "The classic green beast.", imageUrl: "https://via.placeholder.com/300x400/00a651/ffffff?text=Original"},
+    {name: "Monster Zero Ultra", category: "Ultra", description: "Citrus zero sugar.", imageUrl: "..."},
+    // Add ALL these 50:
+    "Monster Absolutely Zero", "Monster Assault", "Monster Zero Sugar", "Monster Lo-Carb",
+    "Monster Khaos", "Monster Ripper", "Monster Pipeline Punch", "Monster Mango Loco", "Monster Pacific Punch",
+    "Monster Papillon", "Monster Aussie Style Lemonade", "Monster Ultra Blue", "Monster Ultra Red",
+    "Monster Ultra Black", "Monster Ultra Paradise", "Monster Ultra Fiesta", "Monster Ultra Rosa",
+    "Monster Ultra Watermelon", "Monster Ultra Gold", "Monster Ultra Peachy Keen", "Monster Java Mean Bean",
+    "Monster Java Loca Moca", "Monster Rehab Peach Tea", "Monster Rehab Lemonade", "Monster Rehab Orangeade",
+    "Monster Rehab Strawberry Lemonade", "Monster Reserve White Pineapple", "Monster Dragon Tea Green Tea",
+    "Muscle Monster Strawberry", "Monster Nitro Super Dry", "Monster MaXX Super Dry", "Monster Ultra Violet",
+    "Monster Ultra Vice Guava", "Monster Ultra Blue Hawaiian", "Monster Khaotic", "Monster The Doctor",
+    "Monster Lewis Hamilton", "Monster Rehab Protean", "Monster Ultra Fantasy Ruby Red", "Monster Java Farmer's Oats",
+    "Monster Rehab Watermelon", "Monster Rehab Wild Berry Tea", "Monster Ultra Strawberry Dreams",
+    "Monster Java Triple Shot Mocha", "Monster Muscle Chocolate", "Monster Energy Import"
+  ]
+  ```
+  - Generate descriptions (1-2 sentences), avgRating: 0 initially.
+
+### 🌐 **Frontend (React + Vite)**
+- **Dependencies**: react-router-dom, axios, framer-motion, lucide-react (icons), recharts (charts), react-confetti, tailwindcss, @tailwindcss/animate.
+- **Auth Context**: Login/Signup forms (email/password), persist JWT in localStorage.
+- **Pages**:
+  | Page | Features |
+  |------|----------|
+  | **Landing** | Hero video/animation, search bar (live filter), featured 5 flavors carousel, "Browse Categories" grid. |
+  | **Catalog** | Infinite scroll grid, search/filter (category), sort by rating. **<FlavorCard>** with glow hover. |
+  | **FlavorDetail** | Hero image, desc, stats, reviews list, **Write Review** form (stars + comment), "Add to Profile" btn (tries flavor, unlocks achv). |
+  | **Leaderboard** | Animated table: Rank, Flavor, Avg Rating, Total Reviews. Neon top 3 badges. |
+  | **Profile** | **Gamified**: Tried flavors grid (with personal ratings), **Achievements** (badges: "Beast Mode" - 5 tried, "Ultra Collector" - 20, "Review King" - 50 reviews, etc. - 10 total), Stats: Pie chart (categories), bar (ratings), total tried/reviews. Confetti on new achv. |
+  | **Auth** | Modal overlays: Signup/Login with validation. |
+
+- **Navbar**: Logo, Links, Search, Profile dropdown (Logout).
+- **API Calls**: Axios interceptor with JWT.
+
+### 🚀 **Setup & Run**
+- **Root package.json**:
+  ```json
+  {"scripts": {"dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\""}}
+  ```
+- **Backend**: `dev: nodemon server.js`
+- **Frontend**: `dev: vite`
+- **.replit**: `run = "npm run dev"`
+- **Env**: Guide to add MONGO_URI, JWT_SECRET.
+- **Deployment**: Vercel/Netlify ready comments.
+
+Make it **production-ready**, bug-free, with loading states, toasts (react-hot-toast), error handling. **Test all features** in code comments. Generate **full code now**!
+```
+
+Copy-paste this **exactly** into Replit AI Agent. It will build the entire app! ****
